@@ -18,7 +18,7 @@ public class WelcomeController {
     }
 
     @GetMapping("/")
-    public String hello(){
+    public String sayHello(){
         return message;
     }
 
