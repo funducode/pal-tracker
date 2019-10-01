@@ -23,7 +23,7 @@ public class InMemoryTimeEntryRepository implements TimeEntryRepository {
 
     public TimeEntry find(long id) {
         final Optional<TimeEntry> entry = timeEntries.stream().filter(c -> c.getId().equals(id)).findAny();
-        return entry.get();
+        return entry.isPresent()? entry.get(): null;
     }
 
     public List<TimeEntry> list() {
@@ -35,11 +35,18 @@ public class InMemoryTimeEntryRepository implements TimeEntryRepository {
         TimeEntry entry = this.find(id);
 
         // remove from the list
-        timeEntries.remove(timeEntries.indexOf(entry));
+        if (timeEntries.indexOf(entry)>0)
+        {    timeEntries.remove(timeEntries.indexOf(entry));
+
         this.timeEntry = timeEntry;
         this.timeEntry.setId(id);
         timeEntries.add(this.timeEntry);
+
         return this.timeEntry;
+        }
+        else {
+         return null;
+        }
     }
 
     public void delete(long id) {
