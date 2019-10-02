@@ -13,7 +13,7 @@ import java.util.List;
 
 import static java.sql.Statement.RETURN_GENERATED_KEYS;
 
-public class JdbcTimeEntryRepository {
+public class JdbcTimeEntryRepository implements ITimeEntryRepository{
 
     private final JdbcTemplate jdbcTemplate;
 
@@ -21,7 +21,7 @@ public class JdbcTimeEntryRepository {
         this.jdbcTemplate = new JdbcTemplate(dataSource);
     }
 
-
+    @Override
     public TimeEntry create(TimeEntry timeEntry) {
         KeyHolder generatedKeyHolder = new GeneratedKeyHolder();
 
@@ -43,21 +43,21 @@ public class JdbcTimeEntryRepository {
         return find(generatedKeyHolder.getKey().longValue());
     }
 
-
-    public TimeEntry find(Long id) {
+    @Override
+    public TimeEntry find(long id) {
         return jdbcTemplate.query(
                 "SELECT id, project_id, user_id, date, hours FROM time_entries WHERE id = ?",
                 new Object[]{id},
                 extractor);
     }
 
-
+    @Override
     public List<TimeEntry> list() {
         return jdbcTemplate.query("SELECT id, project_id, user_id, date, hours FROM time_entries", mapper);
     }
 
-
-    public TimeEntry update(Long id, TimeEntry timeEntry) {
+    @Override
+    public TimeEntry update(long id, TimeEntry timeEntry) {
         jdbcTemplate.update("UPDATE time_entries " +
                         "SET project_id = ?, user_id = ?, date = ?,  hours = ? " +
                         "WHERE id = ?",
@@ -70,8 +70,8 @@ public class JdbcTimeEntryRepository {
         return find(id);
     }
 
-
-    public void delete(Long id) {
+    @Override
+    public void delete(long id) {
         jdbcTemplate.update("DELETE FROM time_entries WHERE id = ?", id);
     }
 
