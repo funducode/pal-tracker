@@ -1,5 +1,6 @@
 package io.pivotal.pal.tracker;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -8,47 +9,60 @@ import java.util.List;
 
 @RestController
 public class TimeEntryController {
-    private TimeEntryRepository timeEntryRepository;
+
+//    @Autowired
+    TimeEntryRepository timeEntryRepository;
 
     public TimeEntryController(TimeEntryRepository timeEntryRepository) {
         this.timeEntryRepository = timeEntryRepository;
     }
 
-    @PostMapping
-    public ResponseEntity create(TimeEntry timeEntryToCreate) {
-        final TimeEntry timeEntry = timeEntryRepository.create(timeEntryToCreate);
-        return new ResponseEntity<TimeEntry>(timeEntry, HttpStatus.CREATED);
+    @PostMapping(path = "/time-entries", consumes = "application/json")
+    public ResponseEntity create(@RequestBody TimeEntry timeEntryToCreate) {
+        TimeEntry timeEntry = timeEntryRepository.create(timeEntryToCreate);
+        ResponseEntity<TimeEntry> responseEntity = new ResponseEntity<TimeEntry>(timeEntry, HttpStatus.CREATED);
+        return responseEntity;
     }
 
     @GetMapping("/time-entries/{timeEntryId}")
     public ResponseEntity<TimeEntry> read(@PathVariable long timeEntryId) {
-        final TimeEntry timeEntry = timeEntryRepository.find(timeEntryId);
-
-        if(timeEntry==null)
-            return new ResponseEntity(HttpStatus.NOT_FOUND);
-
-        return new ResponseEntity<TimeEntry>(timeEntry, HttpStatus.OK);
+        TimeEntry timeEntry = timeEntryRepository.find(timeEntryId);
+        if (timeEntry == null) {
+            ResponseEntity<TimeEntry> responseEntity = new ResponseEntity<TimeEntry>(HttpStatus.NOT_FOUND);
+            return responseEntity;
+        } else {
+            ResponseEntity<TimeEntry> responseEntity = new ResponseEntity<TimeEntry>(timeEntry, HttpStatus.OK);
+            return responseEntity;
+        }
     }
 
-   @GetMapping("/time-entries")
+    @GetMapping("/time-entries")
     public ResponseEntity<List<TimeEntry>> list() {
-       final List<TimeEntry> timeEntries = timeEntryRepository.list();
-       return new ResponseEntity<List<TimeEntry>>(timeEntries, HttpStatus.OK);
+        ResponseEntity<List<TimeEntry>> responseEntity = new ResponseEntity<List<TimeEntry>>(timeEntryRepository.list(), HttpStatus.OK);
+        return responseEntity;
     }
 
-    @PutMapping
-    public ResponseEntity update(long timeEntryId, TimeEntry expected) {
-        TimeEntry updateEntry = timeEntryRepository.update(timeEntryId, expected);
-
-        if(updateEntry==null)
-            return new ResponseEntity(HttpStatus.NOT_FOUND);
-
-        return new ResponseEntity<TimeEntry>(updateEntry, HttpStatus.OK);
+    @RequestMapping(
+            value = "/time-entries/{timeEntryId}",
+            produces = "application/json",
+            method = {RequestMethod.PUT})
+    public ResponseEntity update(@PathVariable long timeEntryId, @RequestBody TimeEntry timeEntry) {
+        TimeEntry updatedtTimeEntry = timeEntryRepository.update(timeEntryId, timeEntry);
+        if (updatedtTimeEntry == null) {
+            ResponseEntity<TimeEntry> responseEntity = new ResponseEntity<TimeEntry>(HttpStatus.NOT_FOUND);
+            return responseEntity;
+        } else {
+            ResponseEntity<TimeEntry> responseEntity = new ResponseEntity<TimeEntry>(updatedtTimeEntry, HttpStatus.OK);
+            return responseEntity;
+        }
     }
 
-    @DeleteMapping
-    public ResponseEntity delete(long timeEntryId) {
-         timeEntryRepository.delete(timeEntryId);
-        return new ResponseEntity<TimeEntry>(HttpStatus.NO_CONTENT);
+    @RequestMapping(
+            value = "/time-entries/{timeEntryId}",
+            produces = "application/json",
+            method = {RequestMethod.DELETE})
+    public ResponseEntity delete(@PathVariable long timeEntryId) {
+        timeEntryRepository.delete(timeEntryId);
+        return new ResponseEntity(HttpStatus.NO_CONTENT);
     }
 }

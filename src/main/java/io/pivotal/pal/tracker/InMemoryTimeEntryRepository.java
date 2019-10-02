@@ -1,58 +1,40 @@
 package io.pivotal.pal.tracker;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
-import java.util.Optional;
+import java.util.Map;
+import java.util.concurrent.atomic.AtomicLong;
 
-public class InMemoryTimeEntryRepository implements TimeEntryRepository {
+public class InMemoryTimeEntryRepository extends TimeEntryRepository{
 
-    TimeEntry timeEntry;
-    List<TimeEntry> timeEntries;
-    long id=1;
+    private Map<Long, TimeEntry> timeEntryMap = new HashMap<>();
 
-    public InMemoryTimeEntryRepository(){
-        timeEntries = new ArrayList<TimeEntry>();
-    }
+    private Long idCounter = 1L;
 
     public TimeEntry create(TimeEntry timeEntry) {
-        this.timeEntry = timeEntry;
-        this.timeEntry.setId(this.id++);
-        timeEntries.add(this.timeEntry);
+        timeEntryMap.put(idCounter,timeEntry);
+        timeEntry.setId(idCounter);
+        idCounter++;
         return timeEntry;
     }
 
     public TimeEntry find(long id) {
-        final Optional<TimeEntry> entry = timeEntries.stream().filter(c -> c.getId().equals(id)).findAny();
-        return entry.isPresent()? entry.get(): null;
+        return timeEntryMap.get(id);
     }
 
     public List<TimeEntry> list() {
-        return timeEntries;
+        return new ArrayList<>(timeEntryMap.values());
     }
 
     public TimeEntry update(long id, TimeEntry timeEntry) {
-
-        TimeEntry entry = this.find(id);
-
-        // remove from the list
-        if (timeEntries.indexOf(entry)>0)
-        {    timeEntries.remove(timeEntries.indexOf(entry));
-
-        this.timeEntry = timeEntry;
-        this.timeEntry.setId(id);
-        timeEntries.add(this.timeEntry);
-
-        return this.timeEntry;
-        }
-        else {
-         return null;
-        }
+        if(timeEntryMap.get(id) == null) return null;
+        timeEntryMap.put(id, timeEntry);
+        timeEntry.setId(id);
+        return timeEntry;
     }
 
     public void delete(long id) {
-        TimeEntry entry = this.find(id);
-        timeEntries.remove(timeEntries.indexOf(entry));
-
+        timeEntryMap.remove(id);
     }
-
 }

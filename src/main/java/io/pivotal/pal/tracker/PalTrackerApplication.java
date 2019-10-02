@@ -6,14 +6,13 @@ import org.springframework.context.annotation.Bean;
 
 @SpringBootApplication
 public class PalTrackerApplication {
-    public static void main(String[] args){
+
+    public static void main(String[] args) {
         SpringApplication.run(PalTrackerApplication.class, args);
     }
 
     @Bean
-    public TimeEntryRepository GetTimeEntryRepository(){
+    public TimeEntryRepository getTimeEntryRepository() {
         return new InMemoryTimeEntryRepository();
     }
-
 }
-
