@@ -16,28 +16,39 @@ public class TimeEntryController {
 
     @PostMapping
     public ResponseEntity create(TimeEntry timeEntryToCreate) {
-        timeEntryRepository.create(timeEntryToCreate);
-        return new ResponseEntity<TimeEntry>(timeEntryToCreate, HttpStatus.OK);
+        final TimeEntry timeEntry = timeEntryRepository.create(timeEntryToCreate);
+        return new ResponseEntity<TimeEntry>(timeEntry, HttpStatus.CREATED);
     }
 
-    @GetMapping
-    public ResponseEntity<TimeEntry> read(long timeEntryId) {
-        return new ResponseEntity<TimeEntry>(timeEntryRepository.find(timeEntryId), HttpStatus.OK);
+    @GetMapping("/time-entries/{timeEntryId}")
+    public ResponseEntity<TimeEntry> read(@PathVariable long timeEntryId) {
+        final TimeEntry timeEntry = timeEntryRepository.find(timeEntryId);
+
+        if(timeEntry==null)
+            return new ResponseEntity(HttpStatus.NOT_FOUND);
+
+        return new ResponseEntity<TimeEntry>(timeEntry, HttpStatus.OK);
     }
 
-   @GetMapping
+   @GetMapping("/time-entries")
     public ResponseEntity<List<TimeEntry>> list() {
-       return new ResponseEntity<List<TimeEntry>>(timeEntryRepository.list(), HttpStatus.OK);
+       final List<TimeEntry> timeEntries = timeEntryRepository.list();
+       return new ResponseEntity<List<TimeEntry>>(timeEntries, HttpStatus.OK);
     }
 
     @PutMapping
     public ResponseEntity update(long timeEntryId, TimeEntry expected) {
-        return new ResponseEntity<TimeEntry>(timeEntryRepository.update(timeEntryId, expected), HttpStatus.OK);
+        TimeEntry updateEntry = timeEntryRepository.update(timeEntryId, expected);
+
+        if(updateEntry==null)
+            return new ResponseEntity(HttpStatus.NOT_FOUND);
+
+        return new ResponseEntity<TimeEntry>(updateEntry, HttpStatus.OK);
     }
 
     @DeleteMapping
     public ResponseEntity delete(long timeEntryId) {
          timeEntryRepository.delete(timeEntryId);
-        return new ResponseEntity<TimeEntry>(HttpStatus.OK);
+        return new ResponseEntity<TimeEntry>(HttpStatus.NO_CONTENT);
     }
 }
